@@ -1,0 +1,87 @@
+version: '3.7'
+services:
+    zookeeper:
+        image: tap:kafka
+        container_name: kafkaZK
+        environment:
+            - KAFKA_ACTION=start-zk
+        networks: 
+            tap:
+                ipv4_address: 10.0.100.22
+    kafkaserver:
+        image: tap:kafka
+        container_name: kafkaServer
+        environment:
+            - KAFKA_ACTION=start-kafka
+            #- KAFKA_HEAP_OPTS=-Xmx256M
+        ports:
+            - 9092:9092
+        networks: 
+            tap:
+                ipv4_address: 10.0.100.23
+        depends_on:
+            - zookeeper
+    kafka-ui:
+        image: provectuslabs/kafka-ui:latest
+        container_name: kafkaWebUI
+        environment:
+            - KAFKA_CLUSTERS_0_NAME=local
+            - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafkaServer:9092
+        ports: 
+            - 8080:8080
+        networks: 
+            - tap
+        depends_on:
+            - kafkaserver
+    nginx:
+        image: tap:nginx
+        ports:
+            - "80:80"
+        networks: 
+            - tap
+        volumes:
+        - ngnix_logs:/var/log/nginx  
+   
+    flume:
+        depends_on:
+            - nginx
+        image: tap:flume
+        networks: 
+            - tap
+        environment:
+           FLUME_CONF_FILE: nginx.conf
+        volumes:
+            - ngnix_logs:/var/log/nginx
+    fluentd:
+        depends_on:
+            - nginx
+        image: tap:fluentd
+        command: "-c /fluentd/etc/nginx.conf"
+        networks: 
+            - tap
+        volumes:
+            - ngnix_logs:/var/log/nginx
+            - ./fluentd/conf:/fluentd/etc/
+    logstash:
+        depends_on:
+            - nginx
+        image: tap:logstash
+        networks: 
+            - tap
+        environment:
+            XPACK_MONITORING_ENABLED: "false"
+        volumes:
+            - ngnix_logs:/var/log/nginx
+            - ./logstash/pipeline/nginx.conf:/usr/share/logstash/pipeline/logstash.conf
+volumes:
+    ngnix_logs:
+networks:
+    tap:
+        name: tap
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.0.100.1/24
+
+
+#     export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
