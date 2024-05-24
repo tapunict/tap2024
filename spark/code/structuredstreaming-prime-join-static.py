@@ -37,8 +37,10 @@ spark = SparkSession \
     .appName("StructuredNetworkWordCount") \
     .getOrCreate()
 
+# To reduce verbose output
+spark.sparkContext.setLogLevel("ERROR")
 
-input = "spark/dataset/primes1.txt"  
+input = "/tmp/dataset/primes1.txt"  
 dataset = spark.read.text(input)
 dataset=dataset.withColumn("list",regexp_replace('value', r'\s+', ' '))
 dataset=dataset.withColumn("flatten",explode(split('list', ' ')))

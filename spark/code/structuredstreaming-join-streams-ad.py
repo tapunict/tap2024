@@ -10,6 +10,9 @@ spark = SparkSession \
     .appName("StructuredNetworkWordCount") \
     .getOrCreate()
 
+# To reduce verbose output
+spark.sparkContext.setLogLevel("ERROR")
+
 # Create DataFrame reading from Rate Source
 impressions = spark \
     .readStream \
