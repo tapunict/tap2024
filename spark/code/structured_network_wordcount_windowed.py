@@ -46,8 +46,8 @@ from pyspark.sql.functions import window
 if __name__ == "__main__":
     host = 'tapnc'
     port = 9999
-    windowSize = 10
-    slideSize = 5
+    windowSize = 60
+    slideSize = 10  
     if slideSize > windowSize:
         print("<slide duration> must be less than or equal to <window duration>", file=sys.stderr)
     windowDuration = '{} seconds'.format(windowSize)

@@ -44,7 +44,7 @@ spark.sparkContext.setLogLevel("ERROR")
 df = spark \
     .readStream \
     .format("rate") \
-    .option("rowsPerSecond", 100) \
+    .option("rowsPerSecond", 100000) \
     .load()
 
 # Rate source produces these data
