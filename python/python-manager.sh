@@ -3,6 +3,6 @@
 PYTHON_DIR="/usr/src/app/"
 
 echo "Running python ${PYTHON_APP} (Python Dir:${PYTHON_DIR})"
-cd /usr/src/app/
+cd /usr/src/app/bin/
 python ${PYTHON_APP}
 

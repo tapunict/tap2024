@@ -4,10 +4,10 @@ import json
 import sys
 import os
 
-async def run(hashtag,fp):
+async def run(fp):
     client = httpx.AsyncClient()
     async with client.stream(
-        "GET", "https://mastodon.uno/api/v1/streaming/hashtag/local?tag="+hashtag, timeout=None
+        "GET", "https://mastodon.cloud/api/v1/streaming/public", timeout=None
     ) as response:
         event_type = None
         async for line in response.aiter_lines():
@@ -19,23 +19,27 @@ async def run(hashtag,fp):
                 continue
             if line.startswith("data:"):
                 data = line.split(":", 1)[1]
-                decoded = json.loads(data)
-                if not isinstance(decoded, dict):
-                    print("event_type", event_type, "data", data, " (not a dict)")
-                    continue
-                print(data)
-                #print(json.dumps(decoded, indent=2))
-                # print data to fp
-                written=fp.write(data+"\n")
-                print("written",written)
-                fp.flush() 
+                try:
+                    decoded = json.loads(data)
+                    if not isinstance(decoded, dict):
+                        print("event_type", event_type, "data", data, " (not a dict)")
+                        continue
+                    print(data)
+                    #print(json.dumps(decoded, indent=2))
+                    # print data to fp
+                    written=fp.write(data+"\n")
+                    print("written",written)
+                    fp.flush() 
+                except Exception:
+                    pass
                 continue
 
 if __name__ == "__main__":
-    hashtag = os.getenv("hashtag", "tap")
+    print("*** Mastodon connector v 1.0 ***")
     outputdir = os.getenv("outputdir", ".")
-    outputfile = outputdir+"/"+hashtag+".jsonl"
+    outputfile = outputdir+"/requests.jsonl"
+    print("Outfile "+outputfile)
     fp = open(outputfile, "a")
-    asyncio.run(run(hashtag,fp))
+    asyncio.run(run(fp))
     ## Close file for writing
     fp.close()
