@@ -36,7 +36,8 @@ print("Done")
 tweetKafka = tp.StructType([
     tp.StructField(name= 'id', dataType= tp.StringType(),  nullable= True),
     tp.StructField(name= 'created_at', dataType= tp.StringType(),  nullable= True),
-    tp.StructField(name= 'content',       dataType= tp.StringType(),  nullable= True)
+    tp.StructField(name= 'content',       dataType= tp.StringType(),  nullable= True),
+    tp.StructField(name= 'language',       dataType= tp.StringType(),  nullable= True)
 ])
 
 
@@ -54,21 +55,23 @@ df = spark \
 # Cast the message received from kafka with the provided schema
 df = df.selectExpr("CAST(value AS STRING)") \
     .select(from_json("value", tweetKafka).alias("data")) \
-    .select("data.id","data.created_at", col("data.content").alias("text"))
+    .select("data.id","data.created_at", "data.language", col("data.content").alias("text"))
 
 # Apply the machine learning model and select only the interesting columns
-df = sentitapModel.transform(df)
+df1 = df.filter(df["language"] == 'en')
+df1=sentitapModel.transform(df1)
 #.select("id", "created_at", "text", "prediction")
-#df=df.select("id", "created_at", "text", "prediction")
+df1 = df1.select("id", "created_at", "text", "language","prediction")
 
+# Add other flow not en directly
 #df.writeStream \
 #    .format("console") \
 #    .option("truncate",False) \
 #    .start() \
 #    .awaitTermination()
 
-df.writeStream \
-    .option("checkpointLocation", "/tmp/") \
-    .format("es") \
-    .start(elastic_index) \
-    .awaitTermination()
+df1.writeStream \
+   .option("checkpointLocation", "/tmp/") \
+   .format("es") \
+   .start(elastic_index) \
+   .awaitTermination()

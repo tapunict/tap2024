@@ -68,15 +68,22 @@ services:
     hostname: fluentd
     container_name: fluentd
     command: "-c /fluentd/etc/mastodon.conf"
-    environment: 
-      - outputdir=/mastodata
-      - PYTHON_APP=mastodon.py
     volumes:
       - ../../fluentd/conf:/fluentd/etc
       - mastodata:/mastodata
     depends_on:
       topics:
         condition: service_completed_successfully
+  kibana:
+    hostname: kibana
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    ports:
+      - 5601:5601
+    volumes:
+      - ../../kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    depends_on:
+        topics:
+          condition: service_completed_successfully
 volumes:
   mastodata:
 

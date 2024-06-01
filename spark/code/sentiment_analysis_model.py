@@ -3,6 +3,7 @@ from pyspark.ml import Pipeline
 from pyspark.ml.feature import StopWordsRemover
 from pyspark.ml.feature import HashingTF, IDF, Tokenizer
 from pyspark.ml.classification import LogisticRegression
+# docker run --hostname spark -p 4040:4040 -it --rm -v /home/tap/tap-workspace/tap2024/spark/code/:/opt/tap/ -v /home/tap/tap-workspace/tap2024/spark/dataset:/tmp/dataset tap:spark /opt/spark/bin/spark-submit /opt/tap/sentiment_analysis_model.py
 
 spark = SparkSession.builder.appName("SentimentAnalysis").getOrCreate()
 # To reduce verbose output
