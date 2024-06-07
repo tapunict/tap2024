@@ -4,8 +4,8 @@ from sparknlp.pretrained import PretrainedPipeline
 
 spark = SparkSession.builder \
     .appName("Spark NLP")\
-    .master("local[8]")\
-    .config("spark.driver.memory","16G")\
+    .master("local[16]")\
+    .config("spark.driver.memory","64G")\
     .config("spark.driver.maxResultSize", "0") \
     .config("spark.kryoserializer.buffer.max", "2000M")\
     .config("spark.jars.packages", "com.johnsnowlabs.nlp:spark-nlp_2.12:5.3.3")\
@@ -19,5 +19,5 @@ print("Apache Spark version: ", spark.version)
 
 pipeline = PretrainedPipeline('entity_recognizer_lg', lang = 'it')
 
-annotations =  pipeline.fullAnnotate("Ciao da John Snow Labs! ")[0]
+annotations =  pipeline.fullAnnotate("Salvatore Nicotra prova a spiegare SPARK agli studenti di TAP presso l'università di Catania")[0]
 print(annotations)
